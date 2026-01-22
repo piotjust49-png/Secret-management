@@ -1,0 +1,36 @@
+# file: deployment-vault-agent.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+  labels:
+    app: myapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+      annotations:
+        # Enable automatic Vault Agent injection
+        vault.hashicorp.com/agent-inject: "true"
+        # Vault role to use for authentication
+        vault.hashicorp.com/role: "myapp-role"
+        # Secret path in Vault
+        vault.hashicorp.com/agent-inject-secret-config.txt: "secret/data/myapp/config"
+        # Template for the secret file
+        vault.hashicorp.com/agent-inject-template-config.txt: |
+          {{- with secret "secret/data/myapp/config" -}}
+          username={{ .Data.data.username }}
+          password={{ .Data.data.password }}
+          {{- end }}
+    spec:
+      serviceAccountName: default
+      containers:
+      - name: app
+        image: busybox
+        command: ["sleep", "3600"]
+

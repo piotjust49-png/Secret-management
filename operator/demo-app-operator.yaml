@@ -1,0 +1,5 @@
+args:
+  - |
+    echo "Full environment dump:";
+    env;
+    sleep 3600;
